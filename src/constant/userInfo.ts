@@ -1,4 +1,8 @@
 export const ROLE = [
+	{ label: 'Associate Dean', value: 'associate_dean' },
+	{ label: 'Director', value: 'director' },
+	{ label: 'HOD', value: 'hod' },
+	{ label: 'Dean', value: 'dean' },
 	{ label: 'Admin', value: 'admin' },
 	{ label: 'Faculty', value: 'faculty' },
 ];
