@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { DepartmentValue, StakeholderStatus, UserDesignation, UserRole } from '../constant';
 import { User } from '../models/user';
 import { hashPassword } from '../utils/password';
+import mongoose from 'mongoose';
 
 interface CreateUserRequest {
     userId: string;
@@ -13,6 +14,7 @@ interface CreateUserRequest {
     status: StakeholderStatus;
     password: string;
     role: UserRole;
+    higherDean?: string; // MongoDB ObjectId as string
 }
 
 interface UserResponse {
@@ -47,7 +49,8 @@ export const AddUser = async (
       designation, 
       status, 
       password, 
-      role
+      role,
+      higherDean
     } = req.body;
 
     // Validate required fields
@@ -55,6 +58,33 @@ export const AddUser = async (
       return res.status(400).json({
         message: `All fields including userId are required`
       });
+    }
+
+    if (role === "associate_dean" && !higherDean) {
+      return res.status(400).json({
+        message: "Higher Dean is required for Associate Dean role"
+      });
+    }
+
+    // Validate and verify higherDean if provided
+    let higherDeanObjectId: mongoose.Types.ObjectId | undefined;
+    if (higherDean) {
+      // Validate ObjectId format
+      if (!mongoose.Types.ObjectId.isValid(higherDean)) {
+        return res.status(400).json({
+          message: "Invalid Higher Dean ID format"
+        });
+      }
+
+      // Verify that the higher dean exists
+      const deanExists = await User.findById(higherDean);
+      if (!deanExists) {
+        return res.status(404).json({
+          message: "Higher Dean not found"
+        });
+      }
+
+      higherDeanObjectId = new mongoose.Types.ObjectId(higherDean);
     }
 
     // Check if user already exists
@@ -86,6 +116,7 @@ export const AddUser = async (
       status,
       password: hashedPassword,
       role,
+      higherDean: higherDeanObjectId, 
       createdAt: new Date(),
       updatedAt: new Date(),
     });
