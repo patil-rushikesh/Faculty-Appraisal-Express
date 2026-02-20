@@ -20,6 +20,7 @@ export interface User extends Document {
   status: StakeholderStatus;
   password: string;
   role: UserRole;
+  higherDean?: mongoose.Types.ObjectId; 
   lastLogin?: Date;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
@@ -86,6 +87,11 @@ const userSchema = new Schema<User>(
       enum: STAKEHOLDER_STATUS.map((option) => option.value),
       required: true,
       default: 'active',
+    },
+
+    higherDean: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
     },
 
     lastLogin: {
