@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import authRoutes from './auth.routes';
 import adminRoutes from './admin.routes';
 import commonRoutes from './common.routes';
+import appraisalRoutes from './appraisal.routes';
 import { authMiddleware } from '../middleware/auth.middleware';
 
 const router: Router = Router();
@@ -33,7 +34,6 @@ router.get('/health', (_req, res) => {
 router.use('/auth', authRoutes);
 router.use('/admin', adminRoutes);
 router.use('/common', commonRoutes);
-
-
+router.use('/appraisal', appraisalRoutes);
 
 export default router;
