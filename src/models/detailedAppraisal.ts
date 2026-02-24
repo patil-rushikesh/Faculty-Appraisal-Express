@@ -15,12 +15,6 @@ export interface IFacultyAppraisal extends Document {
   userId: string;
   status: AppraisalStatus;
 
-  facultyInfo: {
-    name: string;
-    designation: DesignationValue;
-    department: string;
-    appraisalPeriod: string;
-  };
 
   partA: {
     resultAnalysis: { value: number; claimed: number }; 
