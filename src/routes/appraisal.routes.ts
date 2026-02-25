@@ -3,47 +3,100 @@ import { authMiddleware } from '../middleware/auth.middleware';
 import {
   createAppraisal,
   getAppraisalByUserId,
-  updateAppraisal,
+  getAllAppraisals,
+  getAppraisalsByDepartment,
+  updatePartA,
+  updatePartB,
+  updatePartC,
+  updatePartD,
+  updatePartDEvaluator,
+  updatePartE,
+  updateDeclaration,
   submitAppraisal,
   verifyAppraisal,
   approveAppraisal,
   deleteAppraisal,
-  getAllAppraisals,
-  getAppraisalsByDepartment,
 } from '../handlers/appraisal.handler';
 
 const router = Router();
 
-// All routes require authentication
+// Every route in this file requires a valid JWT.
 router.use(authMiddleware());
 
-// GET /appraisal - Get all appraisals (Admin/Director/Dean/HOD)
-router.get('/', authMiddleware('admin', 'dean', 'hod') , getAllAppraisals);
+// List all appraisals — restricted to elevated roles.
+router.get(
+  '/',
+  authMiddleware('admin', 'director', 'dean', 'associate_dean', 'hod'),
+  getAllAppraisals
+);
 
-// GET /appraisal/department/:department - Get appraisals by department (Dean/HOD)
-router.get('/department/:department', getAppraisalsByDepartment);
+// Must be declared BEFORE /:userId to avoid Express matching "department" as a userId.
+router.get(
+  '/department/:department',
+  authMiddleware('admin', 'director', 'dean', 'associate_dean', 'hod'),
+  getAppraisalsByDepartment
+);
+
+// POST /appraisal
+// Create a new DRAFT appraisal for the authenticated faculty member.
+router.post('/', createAppraisal);
 
 
-// POST /appraisal - Create new appraisal
-router.post('/', createAppraisal);;
-
-
-// PATCH /appraisal/:userId/submit - Submit for review (Faculty)
-router.patch('/:userId/submit', submitAppraisal);
-
-// PATCH /appraisal/:userId/verify - Verify appraisal (Dean/HOD)
-router.patch('/:userId/verify', verifyAppraisal);
-
-// PATCH /appraisal/:userId/approve - Approve appraisal (Director/Dean)
-router.patch('/:userId/approve', approveAppraisal);
-
-// GET /appraisal/:userId - Get appraisal by userId (Faculty can view own, Admin/Dean/HOD can view all)
+// GET /appraisal/:userId
+// Fetch the full appraisal document — owner or evaluator roles.
 router.get('/:userId', getAppraisalByUserId);
 
-// PUT /appraisal/:userId - Update appraisal (Faculty)
-router.put('/:userId', updateAppraisal);
+// PUT /appraisal/:userId/part-a  — Academic Involvement
+router.put('/:userId/part-a', updatePartA);
 
-// DELETE /appraisal/:userId - Delete appraisal (Faculty, draft only)
+// PUT /appraisal/:userId/part-b  — Research & Innovations
+router.put('/:userId/part-b', updatePartB);
+
+// PUT /appraisal/:userId/part-c  — Self Development
+router.put('/:userId/part-c', updatePartC);
+
+// PUT /appraisal/:userId/part-d  — Portfolio (faculty self-assessment fields only)
+router.put('/:userId/part-d', updatePartD);
+
+// PUT /appraisal/:userId/part-d/evaluator
+// Dean / HOD / Director enters their evaluation marks after faculty submission.
+router.put(
+  '/:userId/part-d/evaluator',
+  authMiddleware('director', 'dean', 'associate_dean', 'hod'),
+  updatePartDEvaluator
+);
+
+// PUT /appraisal/:userId/part-e  — Extraordinary Contributions
+router.put('/:userId/part-e', updatePartE);
+
+
+// PATCH /appraisal/:userId/declaration
+router.patch('/:userId/declaration', updateDeclaration);
+
+
+// PATCH /appraisal/:userId/submit
+// Faculty freezes and submits their appraisal (DRAFT → SUBMITTED).
+router.patch('/:userId/submit', submitAppraisal);
+
+// PATCH /appraisal/:userId/verify
+// Dean / HOD enters verified marks (SUBMITTED → VERIFIED).
+router.patch(
+  '/:userId/verify',
+  authMiddleware('director', 'dean', 'associate_dean', 'hod'),
+  verifyAppraisal
+);
+
+// PATCH /appraisal/:userId/approve
+// Director / Dean gives final approval (VERIFIED → APPROVED).
+router.patch(
+  '/:userId/approve',
+  authMiddleware('director', 'dean'),
+  approveAppraisal
+);
+
+
+// DELETE /appraisal/:userId
+// Owner can delete their own DRAFT appraisal only.
 router.delete('/:userId', deleteAppraisal);
 
 export default router;

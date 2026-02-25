@@ -21,21 +21,24 @@ declare global {
 export const authMiddleware = (...allowedRoles: UserRole[]) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      // Get token from Authorization header
+      // Get token from Authorization header or cookies
       const authHeader = req.headers.authorization;
+      const cookieToken = req.cookies?.access_token;
       
-      if (!authHeader) {
-        sendError(res, 'Missing token', HttpStatus.UNAUTHORIZED);
-        return;
+      let token: string | undefined;
+      
+      if (authHeader) {
+        // Extract token from "Bearer <token>"
+        token = authHeader.startsWith('Bearer ') 
+          ? authHeader.slice(7) 
+          : authHeader;
+      } else if (cookieToken) {
+        // Use token from cookie
+        token = cookieToken;
       }
-
-      // Extract token from "Bearer <token>"
-      const token = authHeader.startsWith('Bearer ') 
-        ? authHeader.slice(7) 
-        : authHeader;
-
+      
       if (!token) {
-        sendError(res, 'Invalid authorization format', HttpStatus.BAD_REQUEST);
+        sendError(res, 'Missing token', HttpStatus.UNAUTHORIZED);
         return;
       }
 
