@@ -56,7 +56,7 @@ export interface IFacultyAppraisal extends Document {
     eLearningInstances:  number;
     weeklyLoadSem1:      number;
     weeklyLoadSem2:      number;
-    adminResponsibility: boolean;
+    phdScholar:           boolean;
     projectsGuided:      number;
     ptgMeetings:         number;
     sectionMarks: {
@@ -274,7 +274,7 @@ const facultyAppraisalSchema = new Schema<IFacultyAppraisal>(
       eLearningInstances:  { type: Number,  default: 0     },
       weeklyLoadSem1:      { type: Number,  default: 0     },
       weeklyLoadSem2:      { type: Number,  default: 0     },
-      adminResponsibility: { type: Boolean, default: false },
+      phdScholar:           { type: Boolean, default: false },
       projectsGuided:      { type: Number,  default: 0     },
       ptgMeetings:         { type: Number,  default: 0     },
       sectionMarks: {
