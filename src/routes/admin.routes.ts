@@ -10,8 +10,8 @@ router.use(authMiddleware('admin'));
 router.post('/create-user', AddUser);
 router.delete('/delete-user', deleteUser);
 router.get('/faculties', getAllUsers);
-router.post('/verification-committee', createVerificationCommittee);
-router.get('/verification-committee/:department', getVerificationCommitteeByDept);
+router.post('/verification-team', createVerificationCommittee);
+router.get('/verification-team/:department', getVerificationCommitteeByDept);
 
 // Interaction deans routes
 router.get('/interaction-deans', getAllInteractionDeans);

@@ -31,26 +31,13 @@ router.get(
 // Fetch the full appraisal document — owner or evaluator roles.
 router.get('/:userId', getAppraisalByUserId);
 
-// PUT /appraisal/:userId/part-a  — Academic Involvement
 router.put('/:userId/part-a', updatePartA);
-
-// PUT /appraisal/:userId/part-b  — Research & Innovations
 router.put('/:userId/part-b', updatePartB);
-
-// PUT /appraisal/:userId/part-c  — Self Development
 router.put('/:userId/part-c', updatePartC);
-
-// PUT /appraisal/:userId/part-d  — Portfolio (faculty self-assessment fields only)
 router.put('/:userId/part-d', updatePartD);
-
-
-// PUT /appraisal/:userId/part-e  — Extraordinary Contributions
 router.put('/:userId/part-e', updatePartE);
 
-
-// PATCH /appraisal/:userId/declaration
 router.patch('/:userId/declaration', updateDeclaration);
-
 
 // PATCH /appraisal/:userId/submit
 // Faculty freezes and submits their appraisal (DRAFT → SUBMITTED).
