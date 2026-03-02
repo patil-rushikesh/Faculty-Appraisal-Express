@@ -26,7 +26,6 @@ router.get(
   getAppraisalsByDepartment
 );
 
-
 // GET /appraisal/:userId/pdf
 router.get('/:userId/pdf', downloadAppraisalPDF);
 
