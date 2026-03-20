@@ -5,13 +5,18 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 
 COPY package.json pnpm-lock.yaml* ./
 COPY tsconfig.json ./
+# Install all dependencies (including devDependencies) for the build
 RUN pnpm install --no-frozen-lockfile
 
 COPY . .
+# Compile TypeScript to JavaScript
 RUN pnpm run build
 
 FROM node:20-slim AS runner
 WORKDIR /app
+
+# Set production environment
+ENV NODE_ENV=production
 
 # Chromium + fonts for puppeteer headless PDF generation.
 # node:20-slim is Debian-based so we use apt.
@@ -38,6 +43,7 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 COPY package.json pnpm-lock.yaml* ./
+# Install ONLY production dependencies (devDependencies are excluded)
 RUN pnpm install --prod --no-frozen-lockfile
 
 COPY --from=builder /app/dist ./dist
@@ -45,4 +51,5 @@ COPY --from=builder /app/dist ./dist
 COPY pdf_template ./pdf_template
 
 EXPOSE 8080
+# Run the compiled JavaScript, NOT ts-node-dev
 CMD ["node", "dist/index.js"]
