@@ -10,7 +10,7 @@ import { errorHandler, notFoundHandler } from "./middleware/error.middleware";
 import connectDB from "./config/database";
 const app: Application = express();
 
-app.use(helmet());
+// app.use(helmet());
 
 app.use(
   cors({
