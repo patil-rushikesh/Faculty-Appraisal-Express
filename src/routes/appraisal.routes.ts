@@ -13,6 +13,8 @@ import {
   updateDeclaration,
   submitAppraisal,
   submitVerifiedMarks,
+  sendToDirector,
+  getSentToDirectorAppraisals,
 } from '../handlers/appraisal.handler';
 import { downloadAppraisalPDF } from '../handlers/pdf.handler';
 
@@ -35,6 +37,13 @@ router.get(
   getAppraisalsByRole
 );
 
+// Director fetches all appraisals sent by HODs
+router.get(
+  '/sent-to-director',
+  authMiddleware('director'),
+  getSentToDirectorAppraisals
+);
+
 // GET /appraisal/:userId/pdf
 router.get('/:userId/pdf', downloadAppraisalPDF);
 
@@ -53,6 +62,9 @@ router.patch('/:userId/submit', submitAppraisal);
 
 // HOD or Director submits verified marks and moves to interaction pending
 router.post('/:userId/verify-marks', authMiddleware('hod', 'director'), submitVerifiedMarks);
+
+// HOD sends completed appraisal to director
+router.patch('/:userId/send-to-director', authMiddleware('hod'), sendToDirector);
 
 router.put(
   '/:userId/part-d/evaluator',

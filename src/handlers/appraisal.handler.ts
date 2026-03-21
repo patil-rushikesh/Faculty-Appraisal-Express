@@ -655,3 +655,66 @@ export const getAppraisalsByRole = async (req: Request, res: Response): Promise<
     sendError(res, 'Failed to retrieve appraisals by role', HttpStatus.INTERNAL_SERVER_ERROR);
   }
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WORKFLOW: SEND TO DIRECTOR
+// PATCH /appraisal/:userId/send-to-director
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const sendToDirector = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { userId } = req.params;
+
+    const appraisal = await findAppraisalOrFail(res, userId);
+    if (!appraisal) return;
+
+    if (appraisal.status !== APPRAISAL_STATUS.COMPLETED) {
+      sendError(
+        res,
+        `Cannot send to director: appraisal is in "${appraisal.status}" status. Only "Completed" appraisals can be sent.`,
+        HttpStatus.BAD_REQUEST
+      );
+      return;
+    }
+
+    appraisal.status = APPRAISAL_STATUS.SENT_TO_DIRECTOR;
+    await appraisal.save();
+
+    sendSuccess(res, appraisal, 'Appraisal sent to Director successfully');
+  } catch (error) {
+    console.error('sendToDirector error:', error);
+    sendError(res, 'Failed to send appraisal to director', HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// READ — all appraisals with "Sent to Director" status
+// GET /appraisal/sent-to-director
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const getSentToDirectorAppraisals = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const appraisals = await FacultyAppraisal.find({
+      status: APPRAISAL_STATUS.SENT_TO_DIRECTOR,
+    })
+      .select('userId role designation appraisalYear status summary partA partB partC partD partE createdAt updatedAt')
+      .sort({ updatedAt: -1 });
+
+    // Enrich with user info
+    const enriched = await Promise.all(
+      appraisals.map(async (appraisal) => {
+        const user = await User.findOne({ userId: appraisal.userId }).lean();
+        return {
+          ...appraisal.toObject(),
+          department: user?.department ?? 'Unknown',
+          name: user?.name ?? appraisal.userId,
+        };
+      })
+    );
+
+    sendSuccess(res, enriched, 'Sent-to-director appraisals retrieved successfully');
+  } catch (error) {
+    console.error('getSentToDirectorAppraisals error:', error);
+    sendError(res, 'Failed to retrieve sent appraisals', HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+};

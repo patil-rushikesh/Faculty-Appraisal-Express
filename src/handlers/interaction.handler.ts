@@ -38,7 +38,7 @@ export const getInteractionPendingFaculty = async (req: Request, res: Response) 
       userQuery.role = { $in: ['hod', 'dean'] };
       // no department filter — college-wide
     } else {
-      userQuery.department = department;
+      // userQuery.department = department;
       userQuery.role = { $in: ['faculty', 'hod'] };
     }
 
@@ -183,6 +183,8 @@ export const getExternals = async (req: Request, res: Response) => {
       // Director only sees externals in the "pccoe" department (director-added)
       query.department = 'pccoe';
     } else if (req.user?.role === 'dean') {
+      // Dean can be assigned to externals across any department, so remove dept filter
+      delete query.department;
       query.assignedDean = req.user.userId;
     } else if (req.user?.role === 'external') {
       query.userId = req.user.userId;
@@ -290,7 +292,7 @@ export const assignDeanToExternal = async (req: Request, res: Response) => {
   try {
     const { department, userId } = req.params;
     const { deanUserId } = req.body;
-
+    // console.log(department, userId, deanUserId);  
     // Find external faculty first
     const external = await User.findOne({
       userId: userId,
@@ -340,7 +342,6 @@ export const assignDeanToExternal = async (req: Request, res: Response) => {
       userId: deanUserId,
       role: 'dean',
       status: 'active',
-      department: department
     });
 
     if (!dean) {
@@ -476,7 +477,6 @@ export const getInteractionDeans = async (req: Request, res: Response) => {
       userId: { $in: interactionDeanRecord.deanIds },
       role: 'dean',
       status: 'active',
-      department: department
     }).select('userId name email department');
 
     const formattedDeans = interactionDeans.map((dean) => ({
@@ -566,7 +566,7 @@ export const submitInteractionEvaluation = async (req: Request, res: Response) =
       status: 'active',
     };
     if (department !== 'pccoe') {
-      facultyQuery.department = department;
+      // facultyQuery.department = department;
     }
 
     const faculty = await User.findOne(facultyQuery);
@@ -599,7 +599,7 @@ export const submitInteractionEvaluation = async (req: Request, res: Response) =
     let evaluation = await InteractionEvaluation.findOne({
       facultyId,
       externalId,
-      department,
+      // department,
     });
 
     if (!evaluation) {
@@ -687,7 +687,7 @@ export const getInteractionEvaluation = async (req: Request, res: Response) => {
     const evaluation = await InteractionEvaluation.findOne({
       facultyId,
       externalId,
-      department,
+      // department,
     });
 
     if (!evaluation) {
