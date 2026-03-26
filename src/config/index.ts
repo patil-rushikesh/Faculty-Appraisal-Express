@@ -20,8 +20,6 @@ export const config = {
   
   // CORS
   allowedOrigins: (process.env.ALLOWED_ORIGINS)
-    .split(',')
-    .map(origin => origin.trim()),
 };
 
 
