@@ -19,7 +19,7 @@ const convertToPdf = (input: Buffer): Promise<Buffer> =>
 const TEMPLATE_PATH = path.join(__dirname, '../../pdf_template/template.docx');
 
 const buildTemplateData = () => ({
-  faculty_name: 'Danish',
+  faculty_name: '',
   faculty_designation: '',
   faculty_department: '',
   result_analysis_marks: '',
